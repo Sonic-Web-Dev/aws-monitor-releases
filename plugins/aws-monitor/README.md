@@ -36,7 +36,7 @@ The MCP server provides these tools:
 | `context_hogs` | Largest tool results by tool, MCP server, file, command |
 | `mcp_usage` | Configured MCP servers vs actually called (find unused servers) |
 | `lessons` | Distilled rules from session history (under 300 tokens) |
-| `suggest_config` | Proposed changes to settings.json, CLAUDE.md, agent frontmatter |
+| `suggest_config` | Proposed changes to settings.json, CLAUDE.md, agent frontmatter (now includes autoCompactWindow suggestion based on 30-day history) |
 | `apply_suggestion` | Apply one suggestion with timestamped backup (requires confirm=true) |
 | `bedrock_spend` | Bedrock and AWS spend for configured profiles |
 
@@ -44,15 +44,34 @@ The MCP server provides these tools:
 
 Run these skills with `/aws-monitor:<skill-name>`:
 
-- **`/aws-monitor:cost-check`**: Check session metrics before large tasks
+- **`/aws-monitor:cost-check`**: Check session metrics before large tasks, with handoff recommendations
+- **`/aws-monitor:handoff`**: Manually write a handoff note before /clear (PreCompact hook covers compaction automatically)
 - **`/aws-monitor:optimize-setup`**: Find and apply configuration improvements
 - **`/aws-monitor:weekly-review`**: Compare week-over-week spend and measure impact
 
 ## How it works
 
-1. **At session start**: The hook calls the `lessons` tool and injects distilled optimization rules into your context
+### Session lifecycle
+
+1. **At session start** (startup|resume): The hook calls the `lessons` tool and injects distilled optimization rules into your context
 2. **During work**: Use the skills to check costs and find optimization opportunities
-3. **Between sessions**: The app analyzes your transcripts and updates lessons.json with new patterns
+3. **Before compaction**: The PreCompact hook automatically writes `.claude/handoff.md` with session summary (goal, decisions, current state, next steps)
+4. **After /clear or compaction**: The SessionStart hook loads the handoff note if it's younger than 24 hours
+5. **Between sessions**: The app analyzes your transcripts and updates lessons.json with new patterns
+
+### Handoff workflow
+
+- **Automatic before compaction**: PreCompact hook runs in background (60s timeout, recursion guard), writes handoff, always exits 0
+- **Manual before /clear**: Run `/aws-monitor:handoff` skill to write a note, then `/clear`
+- **Auto-loaded**: SessionStart (clear|compact) loads handoff if <24h old, plus lessons
+- **Cost**: ~$0.01-0.03 per automatic handoff (Haiku on ~50K tokens transcript tail)
+
+### autoCompactWindow suggestion
+
+The `suggest_config` tool now analyzes your 30-day session history (peak context, compaction frequency, cost above 150K) and suggests an optimal autoCompactWindow setting:
+- **180K window**: If multiple sessions compacted 2+ times or high cost above 150K (compact earlier to save $)
+- **200K window**: Standard for moderate peak usage
+- **250K window**: If average peak is very high (increase window to reduce compaction frequency)
 
 ## Uninstall
 

@@ -1,5 +1,5 @@
 {
-  "description": "Session cost tracking and optimization lessons",
+  "description": "Session cost lessons and automatic handoff notes across compaction and /clear",
   "hooks": {
     "SessionStart": [
       {
@@ -8,9 +8,32 @@
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh",
-            "args": [],
             "timeout": 5,
             "statusMessage": "Loading AWS cost lessons..."
+          }
+        ]
+      },
+      {
+        "matcher": "clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-start-handoff.sh",
+            "timeout": 5,
+            "statusMessage": "Loading handoff note..."
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "manual|auto",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/pre-compact-handoff.sh",
+            "timeout": 10,
+            "statusMessage": "Writing handoff note..."
           }
         ]
       }
