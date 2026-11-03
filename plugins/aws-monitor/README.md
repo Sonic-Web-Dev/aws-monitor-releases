@@ -55,7 +55,7 @@ Run these skills with `/aws-monitor:<skill-name>`:
 
 1. **At session start** (startup|resume): The hook calls the `lessons` tool and injects distilled optimization rules into your context
 2. **During work**: Use the skills to check costs and find optimization opportunities
-3. **Before compaction**: The PreCompact hook automatically writes `.claude/handoff.md` with session summary (goal, decisions, current state, next steps)
+3. **Before compaction**: The PreCompact hook writes a handoff note in the background with Haiku to `~/.claude/aws-monitor/handoffs/<project>.md` (outside the repo). After `/clear` or compaction, notes under 24 hours old are loaded automatically (about 1000 tokens)
 4. **After /clear or compaction**: The SessionStart hook loads the handoff note if it's younger than 24 hours
 5. **Between sessions**: The app analyzes your transcripts and updates lessons.json with new patterns
 
@@ -69,9 +69,7 @@ Run these skills with `/aws-monitor:<skill-name>`:
 ### autoCompactWindow suggestion
 
 The `suggest_config` tool now analyzes your 30-day session history (peak context, compaction frequency, cost above 150K) and suggests an optimal autoCompactWindow setting:
-- **180K window**: If multiple sessions compacted 2+ times or high cost above 150K (compact earlier to save $)
-- **200K window**: Standard for moderate peak usage
-- **250K window**: If average peak is very high (increase window to reduce compaction frequency)
+- **150000**: suggested when average peak context exceeds 140K, sessions compact repeatedly, or more than $20 was spent above 150K in 30 days. Compacting at 150K keeps sessions out of the most expensive range.
 
 ## Uninstall
 

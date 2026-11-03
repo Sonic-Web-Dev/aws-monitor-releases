@@ -1,6 +1,6 @@
 {
   "name": "aws-monitor",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "AWS cost tracking and Claude Code session optimization",
   "author": {
     "name": "Sonic Web Dev"
