@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "aws-monitor": {
+      "command": "/Applications/AWS Monitor.app/Contents/MacOS/aws-monitor-mcp",
+      "args": [],
+      "disabled": false
+    }
+  }
+}

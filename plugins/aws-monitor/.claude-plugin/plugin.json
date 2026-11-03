@@ -1,0 +1,9 @@
+{
+  "name": "aws-monitor",
+  "version": "0.1.2",
+  "description": "AWS cost tracking and Claude Code session optimization",
+  "author": {
+    "name": "Sonic Web Dev"
+  },
+  "homepage": "https://github.com/Sonic-Web-Dev/aws-monitor-releases"
+}
