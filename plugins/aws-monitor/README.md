@@ -46,7 +46,8 @@ Run these skills with `/aws-monitor:<skill-name>`:
 
 - **`/aws-monitor:cost-check`**: Check session metrics before large tasks, with handoff recommendations
 - **`/aws-monitor:handoff`**: Manually write a handoff note before /clear (PreCompact hook covers compaction automatically)
-- **`/aws-monitor:optimize-setup`**: Find and apply configuration improvements
+- **`/aws-monitor:lean-workflow`**: Route multi-step work: when to clear, one task per agent, plan/execute with one reviewer per phase
+- **`/aws-monitor:optimize-setup`**: Find and apply configuration improvements, including a subagent audit (Opus agents, missing maxTurns/autoCompactWindow, model force, teams)
 - **`/aws-monitor:weekly-review`**: Compare week-over-week spend and measure impact
 
 ## How it works
