@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PreCompact hook: write a handoff note for the project before context is compacted.
+# PreCompact hook: write a handoff note for this chat before its context is compacted.
 # The summary runs detached so compaction is never blocked; the next SessionStart picks it up.
 set -uo pipefail
 
@@ -14,10 +14,13 @@ source "$HERE/handoff-lib.sh"
 INPUT=$(cat)
 TRANSCRIPT=$(jq -r '.transcript_path // empty' <<<"$INPUT")
 CWD=$(jq -r '.cwd // empty' <<<"$INPUT")
+SID=$(jq -r '.session_id // empty' <<<"$INPUT")
 [[ -z "$CWD" ]] && CWD="$PWD"
 [[ -f "$TRANSCRIPT" ]] || exit 0
+# The transcript file is named after the session id.
+[[ -z "$SID" ]] && SID=$(basename "$TRANSCRIPT" .jsonl)
 
-OUT=$(handoff_path "$CWD")
+OUT=$(handoff_path "$CWD" "$SID")
 mkdir -p "$(dirname "$OUT")"
 
 # Only user and assistant text; tool output is the bulk of a transcript and adds little to a handoff.
@@ -51,8 +54,8 @@ TMP="$OUT.tmp.$$"
     | timeout 120 claude -p "${BARE[@]}" --model haiku --system-prompt "$SYSTEM" \
       --tools "" --strict-mcp-config --no-session-persistence >"$TMP" 2>/dev/null
   if [[ -s "$TMP" ]]; then
-    { printf '<!-- handoff written %s before %s compaction -->\n' \
-        "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(jq -r '.trigger // "auto"' <<<"$INPUT")"
+    { printf '<!-- handoff written %s before %s compaction, session %s -->\n' \
+        "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(jq -r '.trigger // "auto"' <<<"$INPUT")" "$SID"
       cat "$TMP"; } >"$OUT"
   fi
   rm -f "$TMP"

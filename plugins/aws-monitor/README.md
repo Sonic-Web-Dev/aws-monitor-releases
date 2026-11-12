@@ -56,7 +56,7 @@ Run these skills with `/aws-monitor:<skill-name>`:
 
 1. **At session start** (startup|resume): The hook calls the `lessons` tool and injects distilled optimization rules into your context
 2. **During work**: Use the skills to check costs and find optimization opportunities
-3. **Before compaction**: The PreCompact hook writes a handoff note in the background with Haiku to `~/.claude/aws-monitor/handoffs/<project>.md` (outside the repo). After `/clear` or compaction, notes under 24 hours old are loaded automatically (about 1000 tokens)
+3. **Before compaction**: The PreCompact hook writes a handoff note in the background with Haiku to `~/.claude/aws-monitor/handoffs/<project>/<session id>.md` (outside the repo, one note per chat). After `/clear` or compaction, notes under 24 hours old are loaded automatically (about 1000 tokens)
 4. **After /clear or compaction**: The SessionStart hook loads the handoff note if it's younger than 24 hours
 5. **Between sessions**: The app analyzes your transcripts and updates lessons.json with new patterns
 
@@ -65,6 +65,7 @@ Run these skills with `/aws-monitor:<skill-name>`:
 - **Automatic before compaction**: PreCompact hook runs in background (60s timeout, recursion guard), writes handoff, always exits 0
 - **Manual before /clear**: Run `/aws-monitor:handoff` skill to write a note, then `/clear`
 - **Auto-loaded**: SessionStart (clear|compact) loads handoff if <24h old, plus lessons
+- **One note per chat**: after compaction a chat loads only its own note; after `/clear` the new chat takes over the newest note of the project and lists the notes of other chats by path
 - **Cost**: ~$0.01-0.03 per automatic handoff (Haiku on ~50K tokens transcript tail)
 
 ### autoCompactWindow suggestion
